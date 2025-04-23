@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -25,6 +25,8 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<"all" | "active" | "completed">(
     "all"
   );
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef<any>(null);
 
   useEffect(() => {
     AsyncStorage.getItem("todos").then((todos) => {
@@ -51,16 +53,12 @@ export default function HomeScreen() {
   };
 
   const handleToggleTask = (id: string) => {
-    const updatedTodos = todos.map((todo) => {
-      if (todo.id === id) {
-        return {
-          ...todo,
-          completed: !todo.completed,
-        };
-      }
-      return todo;
-    });
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, completed: !todo.completed } : todo
+    );
     setTodos(updatedTodos);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
     AsyncStorage.setItem("todos", JSON.stringify(updatedTodos));
   };
 
@@ -211,6 +209,15 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={EmptyState}
       />
+
+      {showConfetti && (
+        <ConfettiCannon
+          count={200}
+          origin={{ x: -10, y: 0 }}
+          autoStart={true}
+          fadeOut={true}
+        />
+      )}
     </SafeAreaView>
   );
 }
