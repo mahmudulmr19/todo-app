@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { randomUUID } from "expo-crypto";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import ConfettiCannon from "react-native-confetti-cannon";
 
 interface Todo {
   id: string;
@@ -25,8 +24,6 @@ export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState<"all" | "active" | "completed">(
     "all"
   );
-  const [showConfetti, setShowConfetti] = useState(false);
-  const confettiRef = useRef<any>(null);
 
   useEffect(() => {
     AsyncStorage.getItem("todos").then((todos) => {
@@ -57,8 +54,6 @@ export default function HomeScreen() {
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     );
     setTodos(updatedTodos);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 2000);
     AsyncStorage.setItem("todos", JSON.stringify(updatedTodos));
   };
 
@@ -84,20 +79,22 @@ export default function HomeScreen() {
     <View style={styles.todoItem}>
       <TouchableOpacity
         onPress={() => handleToggleTask(item.id)}
-        style={styles.todoCheckbox}
+        style={styles.todoRow}
       >
-        {item.completed ? (
-          <View style={styles.checkboxFilled}>
-            <Ionicons name="checkmark" size={16} color="#fff" />
-          </View>
-        ) : (
-          <View style={styles.checkboxEmpty} />
-        )}
-      </TouchableOpacity>
+        <View style={styles.todoCheckbox}>
+          {item.completed ? (
+            <View style={styles.checkboxFilled}>
+              <Ionicons name="checkmark" size={16} color="#fff" />
+            </View>
+          ) : (
+            <View style={styles.checkboxEmpty} />
+          )}
+        </View>
 
-      <Text style={[styles.todoText, item.completed && styles.completedText]}>
-        {item.task}
-      </Text>
+        <Text style={[styles.todoText, item.completed && styles.completedText]}>
+          {item.task}
+        </Text>
+      </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => handleDeleteTask(item.id)}
@@ -209,15 +206,6 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={EmptyState}
       />
-
-      {showConfetti && (
-        <ConfettiCannon
-          count={200}
-          origin={{ x: -10, y: 0 }}
-          autoStart={true}
-          fadeOut={true}
-        />
-      )}
     </SafeAreaView>
   );
 }
@@ -328,6 +316,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f0f0f0",
   },
+  todoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
   todoCheckbox: {
     marginRight: 16,
   },
@@ -357,5 +350,9 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 4,
+    minWidth: 40,
+    minHeight: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
